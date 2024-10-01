@@ -1,0 +1,33 @@
+{%extends 'store/base.html'%}
+
+{%block main_block%}
+
+
+
+<strong><h1 class="text-center">Cakes</h1></strong>
+<div class="mx-auto grid w-full max-w-7xl items-center space-y-4 px-2 py-10 md:grid-cols-2 md:gap-6 md:space-y-0 lg:grid-cols-4">
+    
+  {%for t in tags%}
+  <a href="{%url 'cake-list' t.id%}" target="_blank" >
+    <div class="relative aspect-[16/9]  w-auto rounded-md md:aspect-auto md:h-[400px]">
+    
+      <img
+        src="{{t.image.url}}"
+        alt="cake img"
+        class="z-0 h-full w-full rounded-md object-cover "
+      />
+   
+      <div class="absolute inset-0 rounded-md bg-gradient-to-t from-gray-900 to-transparent"></div>
+      <div class="absolute bottom-4 left-4 text-left">
+        <h1 class="text-lg font-semibold text-white">{{t.title}}</h1>
+       
+        <!-- <button class="mt-2 inline-flex cursor-pointer items-center text-sm font-semibold text-white">
+          View More →
+        </button> -->
+      </div>
+    </div>
+</a>
+   {%endfor%}
+  </div>
+  
+{%endblock%}
