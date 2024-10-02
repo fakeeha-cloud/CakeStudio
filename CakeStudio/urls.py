@@ -26,8 +26,10 @@ urlpatterns = [
     path('',views.SignInView.as_view(),name='sign-in'),
     path('index/',views.IndexView.as_view(),name='index'),
     path('cakes/<int:pk>/list/',views.CakeListView.as_view(),name='cake-list'),
-    path('cake/variant/<int:pk>/',views.CakeVaraintsView.as_view(),name='cake-variants'),
-    path('cake/variant/<int:pk1>/<int:pk2>/detail/',views.CakeVariantDetailView.as_view(),name='variant'),
+    path('cake/variant/<int:pk>/<int:pk1>',views.CakeVaraintsView.as_view(),name='cake-variants'),
+    path('cake/<int:pk1>/variant/<int:pk2>/<int:pk>/detail/',views.CakeVariantDetailView.as_view(),name='variant'),
+    path('cake/<int:pk>/<int:pk1>/cart/add',views.AddToCartView.as_view(),name='add-cartItem'),
+    path('cart/summary/',views.MyCartView.as_view(),name='mycart')
 
 
 

@@ -56,52 +56,86 @@ class IndexView(View):
 #url-lh:8000/cake/<int:pk>/list/
 class CakeListView(View):
     def get(self,request,*args,**kwargs):
+
         id=kwargs.get('pk')
+
         qs=Cake.objects.filter(tag_objects=id)
-        
+
+        # print('tag:',id)
       
-        return render(request,'store/cake_list.html',{'cakes':qs})
+        return render(request,'store/cake_list.html',{'cakes':qs,'tag_id':id})
 
 
 class CakeVaraintsView(View):
     def get(self,request,*args,**kwargs):
+        
         id=kwargs.get('pk')
+        
+        tag_id=kwargs.get('pk1')
+
+        # print('tag..:',tag_id)
+
         cake_obj=Cake.objects.get(id=id)
+
         qs=CakeVariant.objects.filter(cake_object=id)
         # cake_variant=CakeVariant.objects.get()
-        return render(request,'store/cake_variants.html',{'variants':qs,'cake':cake_obj})
+        return render(request,'store/cake_variants.html',{'variants':qs,'cake':cake_obj,'tag_id':tag_id})
     
 class CakeVariantDetailView(View):
     def get(self,request,*args,**kwargs):
         v_id=kwargs.get('pk1')
         c_id=kwargs.get('pk2')
+        tag_id=kwargs.get('pk')
+
+        # print('tag..:',tag_id)
+      
         cake_variant_object=CakeVariant.objects.get(id=v_id)
         cake_object=Cake.objects.get(id=c_id)
 
-        return render(request,'store/cake_variants.html',{'variant':cake_variant_object,'cake':cake_object})
+        return render(request,'store/cake_variants.html',{'variant':cake_variant_object,'cake':cake_object,'tag_id':tag_id})
 
 
-class IncreaseQuantityView(View):
-    def post(self,request,*args,**kwargs):
+class AddToCartView(View):
+    def get(self,request,*args,**kwargs):
+        v_id=kwargs.get('pk')
+
+        tag_id=kwargs.get('pk1')
+
+        print('tag..:',tag_id)
         
+        variant_object=CakeVariant.objects.get(id=v_id)
+
+        tag_obj=Tag.objects.get(id=tag_id)
+
+        shape=variant_object.shape_object
 
 
 
+        print('shape name:',shape)
 
+  
 
+        CartItems.objects.create(
+                                    cart_object=request.user.basket,
 
+                                    cake_variant_object=variant_object,
 
-# class AddToCartView(View):
-#     def get(self,request,*args,**kwargs):
-#         v_id=kwargs.get('pk')
-        
-#         variant_object=CakeVariant.objects.get(id=v_id)
+                                    tag_object=tag_obj,
 
-#         CartItems.objects.create(
-#                                     cart_object=request.user.basket,
+                                    shape_object=variant_object.shape_object,
+                                    
+                                    flavour_object=variant_object.flavour_object,
 
-#                                     cake_variant_object=variant_object,
+                                    weight_object=variant_object.weight_object                     
 
-                                  
+                                )
+        return redirect('index')
 
-#                                 )
+#view for cart list
+#url:lh:8000/cart/summary
+class MyCartView(View):
+    def get(self,request,*args,**kwargs):
+
+        cart_items=request.user.basket.basket_items.filter(is_order_placed=False)
+
+        return render(request,'store/cart_summary.html',{'cartitems':cart_items})
