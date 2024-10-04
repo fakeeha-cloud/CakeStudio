@@ -234,18 +234,26 @@ class PaymentView(View):
 
         payment = client.order.create(data=data) 
 
-        myorder_obj=MyOrders.objects.filter(user_object=request.user)
+
+        myorder_id=kwargs.get('pk')
+
+        myorder_obj=MyOrders.objects.get(id=myorder_id)
 
         print('my order..',myorder_obj)
 
         myorder_obj.order_id=payment.get('id')
 
-        cart_items=request.user.basket.basket_items.filter(is_order_placed=False) 
+        myorder_obj.save() 
 
-        for ci in cart_items:                                                                     #taking each project object from cart items
+        # cart_items=request.user.basket.basket_items.filter(is_order_placed=False) 
 
-            myorder_obj.cart_item_object.add(ci.cake_variant_object)                              #adding each project object to project_object field in OrderSummary
-            myorder_obj.save() 
+        # print('cart item...',cart_items)
+
+        # for ci in cart_items:
+
+        #       myorder_obj.cart_item_object.add(ci.cake_variant_object)
+
+        # myorder_obj.save() 
 
         context={
             'key':KEY_ID,

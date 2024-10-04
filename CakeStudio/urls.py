@@ -33,7 +33,7 @@ urlpatterns = [
     path('cart/item/<int:pk>/update',views.QuantityUpdateView.as_view(),name='cart-update'),
     path('cart/item/<int:pk>/remove',views.CartItemDeleteView.as_view(),name='cartItem-remove'),
     path('checkout/',views.CheckOutView.as_view(),name='checkout'),
-    path('payment/',views.PaymentView.as_view(),name='payment'),
+    path('payment/<int:pk>',views.PaymentView.as_view(),name='payment'),
     path('payment/verification/',views.PaymentVerificationView.as_view(),name='payment-verify'),
 
 

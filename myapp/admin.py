@@ -10,6 +10,7 @@ admin.site.register(Flavour)
 admin.site.register(Weight)
 
 
+
 class CakeVarientInline(admin.TabularInline):
     model=CakeVariant
     extra=2
