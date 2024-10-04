@@ -29,7 +29,12 @@ urlpatterns = [
     path('cake/variant/<int:pk>/<int:pk1>',views.CakeVaraintsView.as_view(),name='cake-variants'),
     path('cake/<int:pk1>/variant/<int:pk2>/<int:pk>/detail/',views.CakeVariantDetailView.as_view(),name='variant'),
     path('cake/<int:pk>/<int:pk1>/cart/add',views.AddToCartView.as_view(),name='add-cartItem'),
-    path('cart/summary/',views.MyCartView.as_view(),name='mycart')
+    path('cart/summary/',views.MyCartView.as_view(),name='mycart'),
+    path('cart/item/<int:pk>/update',views.QuantityUpdateView.as_view(),name='cart-update'),
+    path('cart/item/<int:pk>/remove',views.CartItemDeleteView.as_view(),name='cartItem-remove'),
+    path('checkout/',views.CheckOutView.as_view(),name='checkout'),
+    path('payment/',views.PaymentView.as_view(),name='payment'),
+    path('payment/verification/',views.PaymentVerificationView.as_view(),name='payment-verify'),
 
 
 

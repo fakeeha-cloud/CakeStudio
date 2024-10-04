@@ -110,7 +110,7 @@ class CakeVariant(models.Model):
 
     is_active=models.BooleanField(default=True)
 
-
+from django.db.models import Sum
 class Cart(models.Model):
 
     owner=models.OneToOneField(User,on_delete=models.CASCADE,related_name="basket")
@@ -120,6 +120,12 @@ class Cart(models.Model):
     updated_date=models.DateTimeField(auto_now=True)
 
     is_active=models.BooleanField(default=True)
+
+    @property
+    def total_amount(self):
+
+        return self.basket_items.filter(is_order_placed=False).values('updated_price').aggregate(total=Sum('updated_price')).get('total')
+         
 
 
 class CartItems(models.Model):
@@ -136,7 +142,9 @@ class CartItems(models.Model):
 
     weight_object=models.ForeignKey(Weight,on_delete=models.CASCADE)
 
-    quantity=models.PositiveIntegerField(default=1,validators=[MinValueValidator(1),MaxValueValidator(20)])
+    quantity=models.PositiveIntegerField(default=1,validators=[MinValueValidator(1),MaxValueValidator(5)])
+
+    updated_price=models.PositiveIntegerField(null=True)
 
     is_order_placed=models.BooleanField(default=False)
 
@@ -159,7 +167,7 @@ class MyOrders(models.Model):
 
     pincode=models.CharField(max_length=6)
 
-    phone=PhoneNumberField(region='IN')
+    phone=models.CharField(max_length=20,unique=True)
 
     payment_options=(
         ("cash","cash"),
