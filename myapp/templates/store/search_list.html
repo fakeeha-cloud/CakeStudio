@@ -1,0 +1,64 @@
+{%extends 'store/base.html'%}
+
+{%block main_block%}
+
+
+
+<div class="mx-auto grid w-full max-w-7xl items-center space-y-4 px-2 py-10 md:grid-cols-2 md:gap-6 md:space-y-0 lg:grid-cols-4">
+{%for c in cakes%} 
+
+<div class="rounded-md border">
+    <img
+      src="{{c.image.url}}"
+      alt="cake_img"
+      class="aspect-[16/9] w-full rounded-md md:aspect-auto md:h-[300px] lg:h-[200px]"
+    />
+    <div class="p-4">
+      <h1 class="inline-flex items-center text-lg font-semibold">
+        {{c.name}} 
+      </h1>
+      {%for t in c.tag_objects.all%}
+      <h1>{{t}}</h1>
+     {%endfor%}
+    
+      <div class="mt-3 flex flex justify-between space-x-2 mb-2">
+
+        <span class="title-font text-left text-xl font-bold text-gray-900 " >
+            ₹{{c.cake_variant.price}} 
+        </span>
+       
+      </div>
+
+      <div class="flex justify-between">
+       
+      <a
+      href=""
+        type="button"
+        class="mt-4  rounded-sm bg-black px-2 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+      >
+       View more...
+      </a>
+      <span>
+        <p class="title-font text-xl text-right text-gray-900 " >
+       
+        {%if c.average_rating %}
+            <i class="fa-solid fa-star fa-sm"></i>{{c.average_rating|floatformat:1}} 
+        {%else%}
+             0
+        {%endif%}
+        
+        </p>
+        <p>
+            ({{c.review_count}} Reviews)
+       </p>
+      </span>
+     
+
+    </div>
+
+    </div>
+  </div>
+
+{%endfor%}
+</div>
+{%endblock%}

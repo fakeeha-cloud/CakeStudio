@@ -23,18 +23,34 @@
           <span class="title-font text-left text-xl font-bold text-gray-900 " >
             ₹{{c.cake_variant.price}} 
           </span>
-          <span class="title-font text-xl text-right font-bold text-gray-900" >
-            reviews
-          </span>
+         
         </div>
-       
+
+        <div class="flex justify-between">
+         
         <a
         href="{%url 'cake-variants' c.id tag_id%}"
           type="button"
-          class="mt-4 w-full rounded-sm bg-black px-2 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+          class="mt-4  rounded-sm bg-black px-2 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
         >
          View more...
         </a>
+        <span>
+          <p class="title-font text-xl text-right text-gray-900 " >
+          {%if c.average_rating %}
+              <i class="fa-solid fa-star fa-sm"></i>{{c.average_rating|floatformat:1}} 
+          {%else%}
+               0
+          {%endif%}
+          </p>
+          <p>
+           ({{c.review_count}} Reviews)
+         </p>
+        </span>
+       
+
+      </div>
+
       </div>
     </div>
 {%endfor%}

@@ -4,7 +4,7 @@
 
 
 
-<strong><h1 class="text-center">Cakes</h1></strong>
+
 
 <!-- carousel -->
 
@@ -65,11 +65,11 @@
 </div>
 
 
-
-<div class="mx-auto grid w-full max-w-7xl items-center space-y-4 px-2 py-10 md:grid-cols-2 md:gap-6 md:space-y-0 lg:grid-cols-4">
+<strong><h1 class="mt-6 px-20 text-center text-2xl ">Your Favourite Picks</h1></strong>
+<div class="mx-auto grid w-full max-w-7xl items-center space-y-4 px-2 py-8 md:grid-cols-2 md:gap-6 md:space-y-0 lg:grid-cols-4">
     
-
   {%for t in tags%}
+  
   <a href="{%url 'cake-list' t.id%}" target="_blank" >
     <div class="relative aspect-[16/9]  w-auto rounded-md md:aspect-auto md:h-[400px]">
     

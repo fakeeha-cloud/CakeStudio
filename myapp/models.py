@@ -20,7 +20,7 @@ class Tag(models.Model):
         return self.title
     
 
-
+from django.db.models import Avg
 from django.db.models import Min
 class Cake(models.Model):
 
@@ -42,6 +42,14 @@ class Cake(models.Model):
     def cake_variant(self):
 
         return self.varients.order_by('price').first()
+    
+    @property
+    def review_count(self):
+        return self.cake_reviews.all().count()
+    
+    @property
+    def average_rating(self):
+        return self.cake_reviews.all().values('rating').aggregate(avg=Avg('rating')).get('avg',0)
     
 
     def __str__(self) -> str:
@@ -167,14 +175,14 @@ class MyOrders(models.Model):
 
     pincode=models.CharField(max_length=6)
 
-    phone=models.CharField(max_length=20,unique=True)
+    phone=models.CharField(max_length=20)
 
     payment_options=(
-        ("cash","cash"),
-        ("upi","upi"),
+        ("cash-on-delivery","cash-on-delivery"),
+        ("online-payment","online-payment"),
     )
 
-    payment_method=models.CharField(max_length=200,choices=payment_options,default="cash")
+    payment_method=models.CharField(max_length=200,choices=payment_options,default="cash-on-delivery")
 
     order_id=models.CharField(max_length=200,null=True)
 
@@ -185,6 +193,8 @@ class MyOrders(models.Model):
     updated_date=models.DateTimeField(auto_now=True)
 
     is_active=models.BooleanField(default=True)
+
+    total=models.FloatField(null=True)
 
 
 

@@ -34,3 +34,310 @@ function showLink(id) {
 
 
 {%url 'payment' a.id%}
+
+...................................
+model=MyOrders                            
+  
+form_class=CheckOutForm                    
+
+template_name="store/address_edit.html"       
+
+success_url=reverse_lazy("checkout")
+
+def form_valid(self, form):                  
+    form.instance.user_object=self.request.user     
+    return super().form_valid(form)
+
+................................
+def get(self,request,*args,**kwargs): 
+
+        myorder_id=kwargs.get('pk')
+
+        myorder_obj=MyOrders.objects.get(id=myorder_id)
+
+        form_instance=CheckOutForm(instance=myorder_obj)
+
+        return render(request,'store/address_edit.html',{'form':form_instance})
+    
+    def post(self,request,*args,**kwargs):
+        
+        myorder_id=kwargs.get('pk')
+
+        myorder_obj=MyOrders.objects.get(id=myorder_id)
+
+       
+        form_instance=CheckOutForm(request.POST,instance=myorder_obj)
+
+        if form_instance.is_valid():
+
+             form_instance.save()
+
+             return redirect ('checkout')
+        else:
+            return render(request,'store/address_edit.html',{'form':form_instance})
+..........................
+import razorpay                              
+class PaymentView(View):
+
+    def get(self,request,*args,**kwargs):
+
+        #create order
+
+        client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))                                     #authentication to razorpay
+
+        amount=request.user.basket.total_amount*100                                           #total amount in wishlist
+
+        data = { "amount": amount, "currency": "INR", "receipt": "order_rcptid_11" }
+
+        payment = client.order.create(data=data) 
+
+
+        myorder_id=kwargs.get('pk')
+
+        myorder_obj=MyOrders.objects.get(id=myorder_id)
+
+        myorder_obj.order_id=payment.get('id')
+
+        myorder_obj.save() 
+
+        cart_items=request.user.basket.basket_items.filter(is_order_placed=False) 
+
+        for ci in cart_items:
+
+              myorder_obj.cart_item_object.add(ci)
+
+        myorder_obj.save() 
+
+        context={
+            'key':KEY_ID,
+            'amount':data.get('amount'),
+            'currency':data.get('currency'),
+            'order_id':payment.get('id')
+        }
+
+        return render(request,'store/payment.html',context)       
+
+
+
+        <a 
+        class="inline-block"
+        href="{{p.files.url}}" download><i class="fa-solid fa-download"></i>&nbsp;download</a>
+       
+        {%endif%}
+        <a 
+        class=" text-blue-500"
+        href="{%url 'review-add' p.id%}"><i class="fa-solid fa-star"></i>Rate & Review Project
+        
+        </a>
+.................................
+
+model=MyOrders                            
+    
+fields = ['payment_method']                   
+
+template_name="store/checkout.html"       
+
+success_url=reverse_lazy("mycart")
+
+def form_valid(self, form):
+
+    payment_method = form.cleaned_data['payment_method']
+    myorder_id=self.kwargs.get('pk')
+    myorder_obj=MyOrders.objects.get(id=myorder_id)
+
+    print('printing...',myorder_id)
+  
+    if payment_method == 'cash':
+
+        cart_items=self.request.user.basket.basket_items.filter(is_order_placed=False) 
+
+        for ci in cart_items:    
+
+            myorder_obj.cart_item_object.add(ci)
+            ci.is_order_placed=True
+            myorder_obj.save() 
+            ci.save()
+
+
+        return redirect('order-placed')
+    
+    elif payment_method == 'upi':
+
+        client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))                                     #authentication to razorpay
+
+        amount=self.request.user.basket.total_amount*100                                           #total amount in wishlist
+
+        data = { "amount": amount, "currency": "INR", "receipt": "order_rcptid_11" }
+
+        payment = client.order.create(data=data)
+
+        myorder_obj.order_id=payment.get('id')
+
+        myorder_obj.save() 
+
+        cart_items=self.request.user.basket.basket_items.filter(is_order_placed=False) 
+
+        for ci in cart_items:    
+
+            myorder_obj.cart_item_object.add(ci)
+
+        myorder_obj.save() 
+
+        context={
+                    'key':KEY_ID,
+                    'amount':data.get('amount'),
+                    'currency':data.get('currency'),
+                    'order_id':payment.get('id')
+                }
+        return render(self.request,'store/payment.html',context)
+
+
+    return super().form_valid(form)
+.............................................*
+****listing address and a button****
+
+<div class="w-1/2">
+    {%if address%}
+        <div class="mb-16">
+              <h1 class=" text-3xl leading-9 font-extrabold text-gray-900 ">Delivery address</h1>
+        </div>
+        <!-- {{address}} -->
+        {%for a in address%}
+        <form action="{%url 'payment' a.id%}" method="post">
+            {%csrf_token%}
+            <div class="items-center mb-4 mt-6">
+                 <input id="radio-{{forloop.counter}}" type="radio" value="{{forloop.counter}}" name="default-radio" onclick="showLink({{forloop.counter}})" class=" w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                 <label for="radio-{{forloop.counter}}" class="mb-6 ms-2 text-lg  text-gray-900 dark:text-gray-300">
+                     {{a.house_name}} {{a.place}}, PIN:{{a.pincode}}, Mob:{{a.phone}}
+                 </label>
+                  <a href="{%url 'address-change' a.id%}"><i class="fa-solid fa-pen-to-square text-blue-500 mx-2"></i></a>
+                <a href="{%url 'address-delet' a.id%}"><i class="fa-solid fa-trash text-blue-500 "></i></a>
+             </div>
+        
+             <div class=" mt-6 link" id="link{{forloop.counter}}" style="display: none;">
+                <div class="mt-6 w-1/2">
+                  <label for="email" class="block text-sm font-medium leading-5  text-gray-700">Payment Method</label>
+                  <div class="mt-1 relative rounded-md shadow-sm">
+                  
+             
+                  </div>
+                </div>
+    
+             <div class="mt-6 w-1/2 flex justify-center">
+              <span class="block  rounded-md shadow-sm">
+                <button
+                target="_blank"
+                 type="submit"
+                    class=" flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-orange-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                    Deliver Here
+                </button>
+              </span>
+             </div>
+            </div>
+    
+        </form>
+        {%endfor%}
+    
+       
+    
+    
+    {%endif%}
+    </div>
+
+    <script>
+        function showLink(id) {
+            // Hide all links first
+            var links = document.querySelectorAll('.link');
+            links.forEach(function(link) {
+                link.style.display = 'none';
+            });
+            
+            // Show the selected link
+            var selectedLink = document.getElementById('link' + id);
+            selectedLink.style.display = 'block';
+        }
+        </script>
+
+......................................
+
+<span class="title-font text-xl text-right text-gray-900" >
+
+    {%if c.average_rating %}
+        <i class="fa-solid fa-star fa-sm"></i>{{c.average_rating|floatformat:1}} 
+    {%else%}
+         0
+    {%endif%}
+     ({{c.review_count}} Reviews)
+   </span>
+
+.................................
+<div class="relative flex items-center justify-center">
+    <img
+      alt="Product gallery 1"
+      src="{{cake.image.url}}"
+      width="650"
+      height="590"
+      class="rounded-lg object-cover md:h-[300px] md:w-full lg:h-full"
+    />
+  </div>
+
+
+  ...................
+
+  <div class="mb-6 items-center justify-center overflow-hidden md:mb-8 lg:mb-0 xl:flex">
+    <div class="w-full xl:flex xl:flex-row-reverse">
+      <div class="relative mb-2.5 w-full shrink-0 overflow-hidden rounded-md border md:mb-3 xl:w-[650px] 2xl:w-[750px]">
+       
+        <div class="relative flex items-center justify-center">
+          <img
+            alt="Product gallery 1"
+            src="{{cake.image.url}}"
+            width="650"
+            height="590"
+            class="rounded-lg object-cover md:h-[200px] md:w-full lg:h-full"
+          />
+        </div>
+       
+        <div class="absolute top-2/4 z-10 flex w-full items-center justify-between">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-white"
+          >
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-white"
+          >
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </div>
+    
+    </div>
+  </div>
+..........................
+
+<a
+href="{%url 'add-cartItem' variant.id tag_id%}"
+  type="button"
+  class="w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+>
+  Add To Cart
+</a>

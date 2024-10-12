@@ -1,8 +1,8 @@
 {%extends 'store/base.html'%}
-
+{%load static%}
 {%block main_block%}
 
-
+{%if cartitems%}
 <div class="container mx-auto mt-10">
     <div class="sm:flex shadow-md my-10">
       <div class="  w-full  sm:w-3/4 bg-white px-10 py-10">
@@ -42,7 +42,7 @@
            
             <div class="flex items-center justify-between pt-5">
               <div class="flex itemms-center">
-                <p class="text-xs leading-3 underline text-gray-800 cursor-pointer">Add to favorites</p>
+                <!-- <p class="text-xs leading-3 underline text-gray-800 cursor-pointer">Add to favorites</p> -->
                 <a 
                 href="{%url 'cartItem-remove' ci.id%}"
                 class="text-xs leading-3 underline text-red-500 pl-5 cursor-pointer">Remove</a>
@@ -65,7 +65,7 @@
         </a>
       </div>
       <div id="summary" class=" w-full   sm:w-1/4   md:w-1/2     px-8 py-10">
-        <h1 class="font-semibold text-2xl border-b pb-8">Order Summary</h1>
+        <h1 class="font-semibold text-2xl border-b pb-8">Price Details</h1>
        
     
        
@@ -76,13 +76,18 @@
             <span>₹{{total_amount}}</span>
           </div>
           <a 
-          href="{%url 'checkout'%}"
-           class="bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full">
-                Checkout
+          href="{%url 'payment'%}"
+          class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-orange-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                Place Order
               </a>
         </div>
       </div>
     </div>
   </div>
-
+{%else%}
+<div class="flex flex-col items-center justify-center h-full mb-16">
+  <img width="400px" src="{%static 'image/empty-cart.jpg' %}" alt="image"> 
+  <h1 class=" text-2xl font-semibold">Your cart is empty!</h1>
+</div>
+{%endif%}
 {%endblock%}
