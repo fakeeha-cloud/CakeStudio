@@ -27,7 +27,7 @@
                 
                 <!-- {{form}} -->
                 <div class="flex items-center">
-                  <button class="border rounded-md py-2 px-4 mr-2"
+                  <button class="border rounded-md py-2 px-4 mr-2 "
                    type="submit"  name="update" value="decrease">-</button>
                   <label for=""></label>
                   <span class="text-center w-9"> {{ci.quantity}}</span>
@@ -37,8 +37,8 @@
               </form>
             
             </div>
-            <p class="text-xs leading-3 text-gray-600 pt-2">Weight: {{ci.weight_object}}</p>
-            <p class="text-xs leading-3 text-gray-600 py-4">Flavour: {{ci.flavour_object}}</p>
+            <p class="text-xs leading-3 text-gray-600 pt-2">Weight: {{ci.cake_variant_object.weight_object}}</p>
+            <p class="text-xs leading-3 text-gray-600 py-4">Flavour: {{ci.cake_variant_object.flavour_object}}</p>
            
             <div class="flex items-center justify-between pt-5">
               <div class="flex itemms-center">

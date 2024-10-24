@@ -7,11 +7,18 @@
   {%for c in cakes%} 
   <!-- {{c.cake_variant}} -->
     <div class="rounded-md border">
+      <div class="relative">
       <img
         src="{{c.image.url}}"
         alt="cake_img"
         class="aspect-[16/9] w-full rounded-md md:aspect-auto md:h-[300px] lg:h-[200px]"
       />
+      <a href="{%url 'add-wishlist' c.id %}"  class="absolute top-2 right-2 text-red-500 hover:text-red-900">
+        <i class="fa-solid fa-heart fa-lg"></i>
+      </a>
+
+    </div>
+
       <div class="p-4">
         <h1 class="inline-flex items-center text-lg font-semibold">
           {{c.name}}
@@ -29,7 +36,7 @@
         <div class="flex justify-between">
          
         <a
-        href="{%url 'cake-variants' c.id tag_id%}"
+        href="{%url 'cake-variants' c.id%}"
           type="button"
           class="mt-4  rounded-sm bg-black px-2 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
         >

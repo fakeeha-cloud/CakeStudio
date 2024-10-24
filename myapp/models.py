@@ -142,14 +142,6 @@ class CartItems(models.Model):
 
     cake_variant_object=models.ForeignKey(CakeVariant,on_delete=models.CASCADE)
 
-    tag_object=models.ForeignKey(Tag,on_delete=models.CASCADE)
-
-    shape_object=models.ForeignKey(Shape,on_delete=models.CASCADE)
-
-    flavour_object=models.ForeignKey(Flavour,on_delete=models.CASCADE)
-
-    weight_object=models.ForeignKey(Weight,on_delete=models.CASCADE)
-
     quantity=models.PositiveIntegerField(default=1,validators=[MinValueValidator(1),MaxValueValidator(5)])
 
     updated_price=models.PositiveIntegerField(null=True)
@@ -161,6 +153,23 @@ class CartItems(models.Model):
     updated_date=models.DateTimeField(auto_now=True)
 
     is_active=models.BooleanField(default=True)
+
+ 
+
+
+class WishList(models.Model):
+
+    user_object = models.ForeignKey(User, on_delete=models.CASCADE) 
+
+    cake_object = models.ForeignKey(Cake, on_delete=models.CASCADE) 
+
+    created_date=models.DateTimeField(auto_now_add=True)
+
+    updated_date=models.DateTimeField(auto_now=True)
+
+    is_active=models.BooleanField(default=True) 
+
+
 
 
 class MyOrders(models.Model):
@@ -175,7 +184,7 @@ class MyOrders(models.Model):
 
     pincode=models.CharField(max_length=6)
 
-    phone=models.CharField(max_length=20)
+    phone=models.CharField(max_length=10)
 
     payment_options=(
         ("cash-on-delivery","cash-on-delivery"),

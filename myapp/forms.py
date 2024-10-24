@@ -30,8 +30,10 @@ class QunatityForm(forms.ModelForm):
 
         widgets={
 
-            'quantity':forms.NumberInput(attrs={'class':'w-10 border p-2','max': '5'})
+            'quantity':forms.NumberInput(attrs={'class':'w-10 border p-2'})
         }
+    
+
 
 class CheckOutForm(forms.ModelForm):
     class Meta:
@@ -43,7 +45,7 @@ class CheckOutForm(forms.ModelForm):
 
            'house_name':forms.TextInput(attrs={'class':'w-full border p-2','placeholder': 'House name'}),
            'place':forms.TextInput(attrs={'class':'w-full border p-2','placeholder': 'Enter your place'}),
-           'pincode':forms.NumberInput(attrs={'class':'w-full border p-2','placeholder': 'Enter 6-digit pincode'}),
+           'pincode':forms.NumberInput(attrs={'class':'w-full border p-2','placeholder': 'Enter 6-digit pincode', 'max_length':'6'}),
            'phone':forms.TextInput(attrs={'class':'w-full border p-2','placeholder': 'Enter your mobile number'}),
            'payment_method':forms.Select(attrs={'class':'w-full border p-2'})
         }
@@ -61,4 +63,6 @@ class ReviewForm(forms.ModelForm):
             'rating':forms.NumberInput(attrs={'class':'w-full border p-2'})
         }
 
+class SearchForm(forms.Form):
 
+   query = forms.CharField(label='Search', max_length=100, required=False)

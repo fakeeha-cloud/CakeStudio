@@ -2,15 +2,18 @@ from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.views.generic import View,FormView,TemplateView,ListView,CreateView,UpdateView
-from myapp.forms import SignUpForm,SignInForm,QunatityForm,CheckOutForm,ReviewForm
+from myapp.forms import SignUpForm,SignInForm,QunatityForm,CheckOutForm,ReviewForm,SearchForm
 from django.contrib.auth import authenticate,login,logout
-from myapp.models import Tag,Cake,CakeVariant,CartItems,MyOrders,Reviews
+from myapp.models import Tag,Cake,CakeVariant,CartItems,MyOrders,Reviews,WishList
 from django.db.models import Min
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from myapp.decoroters import signin_required
 from twilio.rest import Client
 from decouple import config
+from django.db.models import Q
+from django.contrib import messages
+import random
 # Create your views here.
 
 account_sid = config('account_sid') 
@@ -28,7 +31,10 @@ def sent_sms(user_phone,message):
     
     print(sms.sid)
 
-
+def generate_otp(length=6):
+    
+    return ''.join([str(random.randint(0, 9)) for i in range(length)])
+   
 
 #view for registration
 #url-lh:8000/register
@@ -38,12 +44,42 @@ class SignUpView(FormView):
 
     def post(self,request,*args,**kwargs):
         form_instance=SignUpForm(request.POST)
+
         if form_instance.is_valid():
-            form_instance.save()
-            return redirect('sign-in')
-        else:
-            return render(request,'store/signup.html',{'form':form_instance})
+
+            otp = generate_otp(6)
+
+            request.session['otp'] = otp
+
+            messages.success(request,f"Your OTP is: {otp}")
+
+            return redirect('verify_otp')
         
+        else:
+            form_instance = SignUpForm()   
+            
+           
+        return render(request,'store/signup.html',{'form':form_instance})
+    
+   
+class verifyOtpView(View):
+    def post(self,request,*args,**kwargs):
+
+        entered_otp = request.POST.get('otp')
+        saved_otp = request.session.get('otp')
+
+        if entered_otp == saved_otp:
+            messages.success(request, "OTP verified successfully!")
+
+        else:
+            messages.error(request, "Invalid OTP, please try again.")
+
+        return render(request, 'otp.html')
+
+
+
+
+
 #login View
 #url-lh:8000
 class SignInView(FormView):
@@ -60,9 +96,11 @@ class SignInView(FormView):
 
             if user_obj:
                 login(request,user_obj)
+                messages.success(request,'Successfully  Login !  ')
                 return redirect('index')
             
-        return render(request,'store/signin.html')
+        messages.error(request,'Login Failure!')    
+        return render(request,'store/signin.html',{'form':form_instance})
     
 #index view
 #url-lh:8000/index/
@@ -75,7 +113,7 @@ class IndexView(View):
         return render(request,self.template_name,{'tags':qs})
 
 
-#display cakes
+#view for display cakes
 #url-lh:8000/cake/<int:pk>/list/
 @method_decorator(signin_required,name='dispatch')
 class CakeListView(View):
@@ -87,50 +125,88 @@ class CakeListView(View):
 
         # print('tag:',id)
       
-        return render(request,'store/cake_list.html',{'cakes':qs,'tag_id':id})
-
+        return render(request,'store/cake_list.html',{'cakes':qs})
+    
+#view for display cakes Variants
+#url-lh:8000/cake/<int:pk>/variants/
 @method_decorator(signin_required,name='dispatch')
 class CakeVaraintsView(View):
     def get(self,request,*args,**kwargs):
         
         id=kwargs.get('pk')
         
-        tag_id=kwargs.get('pk1')
-
-        # print('tag..:',tag_id)
+        print('cake..:',id)
 
         cake_obj=Cake.objects.get(id=id)
 
         qs=CakeVariant.objects.filter(cake_object=id)
     
-        return render(request,'store/cake_variants.html',{'variants':qs,'cake':cake_obj,'tag_id':tag_id})
+        return render(request,'store/cake_variants.html',{'variants':qs,'cake':cake_obj})
 
+#view for display cakes Variant detail
+#url-lh:8000/cake/<int:pk1>/variant/<int:pk2>/detail/
 @method_decorator(signin_required,name='dispatch') 
 class CakeVariantDetailView(View):
     def get(self,request,*args,**kwargs):
         v_id=kwargs.get('pk1')
         c_id=kwargs.get('pk2')
-        tag_id=kwargs.get('pk')
-
-        # print('tag..:',tag_id)
-      
+     
         cake_variant_object=CakeVariant.objects.get(id=v_id)
         cake_object=Cake.objects.get(id=c_id)
 
-        return render(request,'store/cake_variants.html',{'variant':cake_variant_object,'cake':cake_object,'tag_id':tag_id})
+        return render(request,'store/cake_variants.html',{'variant':cake_variant_object,'cake':cake_object})
+ 
+#view for add to wishlist
+#url-lh:8000/cake/<int:pk>/wishlist/add
+@method_decorator(signin_required,name='dispatch')  
+class AddToWishListView(View):
+    def get(self,request,*args,**kwargs):
 
+        cake_id=kwargs.get('pk')
+
+        cake_obj=Cake.objects.get(id=cake_id)
+
+        WishList.objects.create(
+                                    user_object=request.user,
+                                    cake_object=cake_obj
+                                )
+        return redirect('mywishlist')
+
+#view for listing  wishlist items
+#url-lh:8000/wishlist/summary/  
+@method_decorator(signin_required,name='dispatch')
+class MyWishlistView(View):
+
+    def get(self,request,*args,**kwargs):
+
+        wishlist_items=WishList.objects.filter(user_object=request.user)
+
+        return render(request,'store/wishlist.html',{'wishitems':wishlist_items})  
+
+#view for remove  wishlist items
+#url-lh:8000/wishlist/item/<int:pk>/remove/    
+@method_decorator(signin_required,name='dispatch')
+class WishlistItemDeleteView(View):
+    def get(self,request,*args,**kwargs):
+
+        wi_id=kwargs.get('pk')
+
+        WishList.objects.get(id=wi_id).delete()
+
+        return redirect('mywishlist')
+
+#view for add to  cart
+#url-lh:8000/cake/<int:pk>/cart/add
 @method_decorator(signin_required,name='dispatch')
 class AddToCartView(View):
     def get(self,request,*args,**kwargs):
         v_id=kwargs.get('pk')
 
-        tag_id=kwargs.get('pk1')
-
         # print('tag..:',tag_id)
         
         variant_object=CakeVariant.objects.get(id=v_id)
 
-        tag_obj=Tag.objects.get(id=tag_id)
+        # tag_obj=Tag.objects.get(id=tag_id)
   
 
         CartItems.objects.create(
@@ -138,21 +214,13 @@ class AddToCartView(View):
 
                                     cake_variant_object=variant_object,
 
-                                    tag_object=tag_obj,
-
-                                    shape_object=variant_object.shape_object,
-                                    
-                                    flavour_object=variant_object.flavour_object,
-
-                                    weight_object=variant_object.weight_object,
-
                                     updated_price=variant_object.price                    
 
                                 )
         return redirect('index')
 
 
-#view for cart list
+#view for listing cart items
 #url:lh:8000/cart/summary
 @method_decorator(signin_required,name='dispatch')
 class MyCartView(View):
@@ -160,7 +228,7 @@ class MyCartView(View):
 
         form_instance=QunatityForm()
 
-        cart_items=request.user.basket.basket_items.filter(is_order_placed=False)
+        cart_items=request.user.basket.basket_items.filter(is_order_placed=False).order_by('-created_date')
 
         total_items=cart_items.count()
 
@@ -203,11 +271,15 @@ class QuantityUpdateView(FormView):
         
         if update_type == 'increase':
 
-            cart_obj.quantity = current_quantity + 1
+            if current_quantity < 5:
+
+                cart_obj.quantity = current_quantity + 1
        
         elif update_type == 'decrease':
 
-            cart_obj.quantity = current_quantity - 1
+            if current_quantity > 1:
+
+                cart_obj.quantity = current_quantity - 1
 
 
         cart_obj.updated_price=current_price * cart_obj.quantity
@@ -221,7 +293,8 @@ class QuantityUpdateView(FormView):
 
 KEY_SECRET=config('KEY_SECRET')
 KEY_ID=config('KEY_ID')
-
+#view for payment
+#url-lh:8000/payment/
 import razorpay
 @method_decorator(signin_required,name='dispatch')                              
 class PaymentView(FormView):
@@ -296,7 +369,8 @@ class PaymentView(FormView):
         else:
             return redirect('payment')
 
-
+#view for order placed
+#url-lh:8000/order/placed/
 @method_decorator(signin_required,name='dispatch')     
 class OrderPlacedView(View):
 
@@ -304,7 +378,8 @@ class OrderPlacedView(View):
 
         return render(request,'store/order_placed.html')
 
-
+#view for payment verification
+#url-lh:8000/payment/verification/
 from django.views.decorators.csrf import csrf_exempt 
 @method_decorator(csrf_exempt,name='dispatch') 
 @method_decorator(signin_required,name='dispatch') 
@@ -341,6 +416,8 @@ class PaymentVerificationView(View):
 
         return redirect('order-placed')  
 
+#view for order summary
+#url-lh:8000/order/summary/
 @method_decorator(signin_required,name='dispatch')
 class MyOrderSummaryView(View):
     def get(self,request,*args,**kwargs):
@@ -349,6 +426,9 @@ class MyOrderSummaryView(View):
 
         return render(request,'store/order_summary.html',{'orders':qs})
 
+
+#view for adding review
+#url-lh:8000/cake/<int:pk>/review-add/
 @method_decorator(signin_required,name='dispatch')
 class ReviewView(CreateView):
     template_name='store/review.html'
@@ -367,23 +447,47 @@ class ReviewView(CreateView):
 
         return super().form_valid(form)
 
+#view for about us
+#url-lh:8000/about-us/
 @method_decorator(signin_required,name='dispatch')
 class AboutUsView(TemplateView):
 
     template_name = 'store/about_us.html'
 
+#view for contact us
+#url-lh:8000/contact-us/
 @method_decorator(signin_required,name='dispatch')
 class ContactUsView(TemplateView):
     template_name = 'store/contact_us.html'
 
-
+#view for sign out
+#url-lh:8000/signout/
 @method_decorator(signin_required,name='dispatch')
 class SignOutView(View):
     def get(self,request,*args,**kwargs):
         logout(request)
         return redirect('sign-in')
     
+#view for search
+#url-lh:8000/search/
+class SearchView(FormView):
 
+    template_name='store/base.html'
 
-    
+    form_class = SearchForm
+
+    def get(self,request,*args,**kwargs):
+
+        query = self.request.GET.get('search')  # Get search term from request
+
+        if query:
+
+            qs=Cake.objects.filter(
+                                         Q(name__icontains=query) | Q(description__icontains=query)
+                                     ) 
+            print('printingg...',qs)    
+                                           
+            return render(request,'store/search_list.html',{'cakes':qs})
+        
+        return redirect('index')
     

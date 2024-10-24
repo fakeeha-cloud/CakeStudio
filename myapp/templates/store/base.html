@@ -39,7 +39,7 @@
             <span class="font-bold">DevUI</span> -->
           </div>
           <div class=" hidden grow items-start lg:flex">
-            <ul class=" ml-12 inline-flex space-x-8">
+            <ul class=" ml-12 inline-flex space-x-9">
               <li class="">
                 <a
                   href="{%url 'index'%}"
@@ -48,28 +48,57 @@
                   Home
                 </a>
               </li>
-              <li class="">
+              <li class="w-[500px]">
 
-               
+               <form action="{%url 'search'%}" method="get">
+                  <label for=""></label>
+                  
+                  <input class="w-1/2 bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow"
+                  type="text" name="search" placeholder="Search items">
+                  <button type="submit">search</button>
+
+               </form>
 
               </li>
             
             </ul>
           </div>
 
+
+          <div class="flex relative group space-x-6  mx-6">
+            <div class=" items-center ">
+              
+             <a href="{%url 'mywishlist' %}"  class="flex items-center">
+              <i class="fa-solid fa-heart fa-xl"></i>
+            </a>
+           
+          </div>
+             <span class="absolute bottom-full bottom-1 transform -translate-x-1/2 bg-white text-black text-sm p-1 rounded shadow-lg opacity-0 group-hover:opacity-100">
+            Wishlist
+             </span>
+         </div>
+
+
           <div class="inline-flex font-semibold space-x-4  hidden lg:block">
-            <a href="{%url 'order-summary'%}" class="font-semibold">
+
+            
+
+
+            <a href="{%url 'order-summary'%}" class="font-semibold ">
               My Orders
               </a> 
             
             <a href="{%url 'sign-out'%}" class="font-semibold">
             <i class="fa-solid fa-power-off fa-xl"></i>LogOut
-            </a>           
+            </a> 
+
               <a href="{%url 'mycart'%}" class="font-semibold">
               <i class="fa-solid fa-cart-shopping fa-xl"></i>Cart
               </a>
                
           </div>
+
+
           <div class="lg:hidden">
             <svg
               xmlns="http://www.w3.org/2000/svg"

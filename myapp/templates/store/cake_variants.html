@@ -39,7 +39,9 @@
               <ul class="flex flex-wrap space-x-2">
                 {%for v in variants%}   
                   <a 
-                    href="{%url 'variant' v.id cake.id tag_id%}"
+                  
+                  href="{%url 'variant' v.id cake.id%}"
+                  
                     class="md:text-15px mb-2 flex h-9 cursor-pointer items-center justify-center rounded border p-1 px-3 text-sm font-medium transition duration-200 ease-in-out md:mb-3 md:h-10">
                     {{v.weight_object}} 
                 </a> 
@@ -71,7 +73,7 @@
             <div class="space-y-2.5 pt-1.5 md:space-y-3.5 lg:pt-3 xl:pt-4">
             
                      <a
-                          href="{%url 'add-cartItem' variant.id tag_id%}"
+                          href="{%url 'add-cartItem' variant.id%}"
                           class="w-1/2 bg-indigo-600 flex gap-2 items-center text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                               stroke-width="1.5" stroke="currentColor" class="size-6">
